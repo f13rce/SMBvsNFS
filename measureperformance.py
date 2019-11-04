@@ -34,8 +34,12 @@ def Log(aText):
 def GetTime():
 	return int(round(time.time() * 1000))
 
-def PerformTest(aFileSize, aDestinationPath, aTestID, aFileStorage):
-	cmd = "cp {}/{}/file_{} {}/file_{}".format(fileDirectory, aFileSize, aTestID, aDestinationPath, aTestID)
+def PerformTest(aFileSize, aDestinationPath, aTestID, aFileStorage, aUsername, aPassword, aServerAddr, aServerShareName):
+	if aFileStorage == "NFS":
+		cmd = "cp {}/{}/file_{} {}/file_{}".format(fileDirectory, aFileSize, aTestID, aDestinationPath, aTestID)
+	else:
+		cmd = "smbclient --user={}%{} //{}/{} -c \"put {}/{}/file_{} ./file_{}\"".format(aUsername, aPassword, aServerAddr, aServerShareName, fileDirectory, aFileSize, aTestID, aTestID)
+		#cmd = "smbclient --user=" + username + "%" + password + " //" + server_address + "/" + aServerShareName + " -c \""
 	start = GetTime()
 	os.system(cmd)
 	end = GetTime()
@@ -51,8 +55,16 @@ def main():
 	# Parse arguments
 	parser = argparse.ArgumentParser()
 	parser.add_argument("-n", "--nfsoutput", help="Path where to store the files for NFS")
-	parser.add_argument("-s", "--smboutput", help="Path where to store the files for SMB")
 	parser.add_argument("-c", "--create", help="Create the files")
+
+	parser.add_argument("-s", "--smboutput", help="Path where to store the files for SMB")
+	parser.add_argument("-u", "--smbusername", help="Username of the SMB user")
+	parser.add_argument("-p", "--smbpassword", help="Password of the SMB user")
+	parser.add_argument("-i", "--smbipaddress", help="IP address of target SMB server")
+	parser.add_argument("-n", "--smbsharename", help="Share name of the SMB connection (//1.2.3.4/ShareName)")
+
+
+	args.smbusername, args.smbpassword, args.smbserveraddr, args.smbserversharename
 
 	args = parser.parse_args()
 	Log("Found args: {}".format((repr(args))))
@@ -111,7 +123,7 @@ def main():
 			Log("Performing tests for {} by copying {} {} files...".format(fileStorage, fileCounts[i], fileSizes[i]))
 			total = 0
 			for j in range(fileCounts[i] - 1):
-				total += PerformTest(fileSizes[i], dest, (j+1), fileStorage)
+				total += PerformTest(fileSizes[i], dest, (j+1), fileStorage, args.smbusername, args.smbpassword, args.smbserveraddr, args.smbserversharename)
 			Log("Total time elapsed for {} with {} {} files: {}ms".format(fileStorage, fileCounts[i], fileSizes[i], total))
 		Log("All done with the tests! Results have been saved to \"{}\"".format(resultsFileName.replace("FILESTORAGE", fileStorage)))
 
