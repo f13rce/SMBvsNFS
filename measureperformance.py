@@ -19,8 +19,8 @@ resultsFileName = "results_FILESTORAGE_{}.csv".format(startTime)
 fileStorages = ["SMB", "NFS"]
 
 fileSizes  = ["1KB", "10KB", "100KB", "1MB", "10MB", "25MB"]
-fileCounts = [100,   25,     10,      10,    5,      2     ]
-#fileCounts = [10000, 2500,   1000,    100,   50,     25,]
+fileCounts = [10000, 2500,   1000,    100,   50,     25,]
+#fileCounts = [100,   25,     10,      10,    5,      2     ]
 ddCommand = "dd if=/dev/urandom of=PATH/FILESIZE/file_INDEX bs=FILESIZE count=1 2>&1" # Macros will be replaced
 fileDirectory = "files"
 
